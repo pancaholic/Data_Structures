@@ -17,7 +17,7 @@ struct Stack
 };
 
 // Set top menjadi null (-1)
-void initStack(Stack *s)
+void initialize(Stack *s)
 {
     s->top = -1;
 }
@@ -54,7 +54,7 @@ char pop(Stack *s)
 }
 
 // Mengambil top
-char peek(Stack *s)
+char peak(Stack *s)
 {
     if (isEmpty(s))
     {
@@ -89,7 +89,7 @@ int precedence(char ch)
 void infixToPostfix(char *infix, char *postfix)
 {
     struct Stack s;
-    initStack(&s);
+    initialize(&s);
     int i = 0, j = 0;
 
     // Loop untuk cek setiap karakter hingga end of string.
@@ -111,12 +111,12 @@ void infixToPostfix(char *infix, char *postfix)
         // Jika karakter adalah close bracket')', pop sampai open bracket '('
         else if (ch == ')')
         {
-            while (!isEmpty(&s) && peek(&s) != '(')
+            while (!isEmpty(&s) && peak(&s) != '(')
             {
                 // add ke postfix
                 postfix[j++] = pop(&s);
             }
-            if (!isEmpty(&s) && peek(&s) == '(')
+            if (!isEmpty(&s) && peak(&s) == '(')
             {
                 pop(&s); // Pop '(' dari stack
             }
@@ -124,7 +124,7 @@ void infixToPostfix(char *infix, char *postfix)
         // Cek Operator
         else if (isOperator(ch))
         {
-            while (!isEmpty(&s) && precedence(peek(&s)) >= precedence(ch))
+            while (!isEmpty(&s) && precedence(peak(&s)) >= precedence(ch))
             {
                 postfix[j++] = pop(&s);
             }
@@ -148,7 +148,7 @@ int main()
     char infix[MAX_SIZE], postfix[MAX_SIZE];
 
     printf("Enter an infix expression: ");
-    scanf("%s", infix);
+    fgets(infix, MAX_SIZE, stdin);
 
     infixToPostfix(infix, postfix);
 
