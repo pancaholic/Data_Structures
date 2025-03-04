@@ -48,7 +48,7 @@ char pop(Stack *s)
 }
 
 // Mengambil top
-char currValue(Stack *s)
+char topValue(Stack *s)
 {
     if (isEmpty(s))
     {
@@ -107,12 +107,12 @@ void infixToPostfix(char *infix, char *postfix)
         // Jika karakter adalah close bracket')', pop sampai open bracket '('
         else if (ch == ')')
         {
-            while (!isEmpty(&s) && currValue(&s) != '(')
+            while (!isEmpty(&s) && topValue(&s) != '(')
             {
                 // add ke postfix
                 postfix[j++] = pop(&s);
             }
-            if (!isEmpty(&s) && currValue(&s) == '(')
+            if (!isEmpty(&s) && topValue(&s) == '(')
             {
                 pop(&s); // Pop '(' dari stack
             }
@@ -120,7 +120,7 @@ void infixToPostfix(char *infix, char *postfix)
         // Cek Operator
         else if (isOperator(ch))
         {
-            while (!isEmpty(&s) && precedence(currValue(&s)) >= precedence(ch))
+            while (!isEmpty(&s) && precedence(topValue(&s)) >= precedence(ch))
             {
                 postfix[j++] = pop(&s);
             }
