@@ -5,7 +5,7 @@
 
 #define TABLE_SIZE 10
 
-// Node structure for chaining
+// Struct untuk Chaining(Linked List)
 struct node
 {
     char data[100];
@@ -13,16 +13,12 @@ struct node
 };
 
 // Hash tables
-struct node *chainTable[TABLE_SIZE]; // Chaining Table
+struct node *chainTable[TABLE_SIZE];
 char linearTable[TABLE_SIZE][100];
 int collisionHandlingMethod = 1;
 int selectedHashingMethod = 1;
 
-// First-Character Hash Function
-int firstCharHash(char data[])
-{
-    return (tolower(data[0]) - 'a') % TABLE_SIZE;
-}
+int occupied[TABLE_SIZE] = {0};
 
 // Mid-Square Hash Function
 int midSquareHash(char data[])
@@ -47,7 +43,7 @@ int midSquareHash(char data[])
     int midStart = len / 2 - 1;
 
     // Extract 2 digit tengah
-    char midDigits[3] = {strKey[midStart], strKey[midStart + 1], '\0'}; 
+    char midDigits[3] = {strKey[midStart], strKey[midStart + 1], '\0'};
 
     // Ubah string menjadi int
     int middleValue = atoi(midDigits);
@@ -67,8 +63,42 @@ int divisionHash(char data[])
 {
     int key = 0;
     for (int i = 0; data[i] != '\0'; i++)
+    {
         key += data[i];
+    }
     return key % TABLE_SIZE;
+}
+
+// Folding Hash Function
+int foldingHash(char data[])
+{
+    int key = 0;
+    for (int i = 0; data[i] != '\0'; i++)
+    {
+        key += data[i];
+    }
+
+    char strKey[20];
+
+    // Ubah int menjadi string
+    sprintf(strKey, "%d", key);
+
+    int sum = 0;
+    int len = strlen(strKey);
+
+    // Process the key in parts of size 2
+    for (int i = 0; i < len; i += 2)
+    {
+        char partStr[3];
+        // Extract 2 digits
+        strncpy(partStr, strKey + i, 2);
+        partStr[2] = '\0';
+
+        int partValue = atoi(partStr);
+        sum += partValue;
+    }
+
+    return sum % TABLE_SIZE;
 }
 
 // Digit Extraction Hash Function
@@ -85,6 +115,7 @@ int digitExtractionHash(char data[])
     int extractedKey;
     if (strlen(strKey) >= 4)
     {
+        // ambil digit ke 2 dan 4
         extractedKey = (strKey[1] - '0') * 10 + (strKey[3] - '0');
     }
     else
@@ -101,11 +132,11 @@ int getHash(char data[])
     switch (selectedHashingMethod)
     {
     case 1:
-        return firstCharHash(data);
-    case 2:
         return midSquareHash(data);
-    case 3:
+    case 2:
         return divisionHash(data);
+    case 3:
+        return foldingHash(data);
     case 4:
         return digitExtractionHash(data);
     default:
@@ -128,7 +159,9 @@ void insertChaining(int hashKey, char data[])
     {
         struct node *curr = chainTable[hashKey];
         while (curr->next != NULL)
+        {
             curr = curr->next;
+        }
         curr->next = newNode;
     }
 }
@@ -144,7 +177,7 @@ void insertLinearProbing(int hashKey, char data[])
     strcpy(linearTable[index], data);
 }
 
-// Double Hashing (Rehashing)
+// Rehashing
 int secondHash(char data[])
 {
     int key = 0;
@@ -153,19 +186,28 @@ int secondHash(char data[])
     return 7 - (key % 7);
 }
 
-void insertDoubleHashing(int hashKey, char data[])
+void insertRehashing(int hashKey, char data[])
 {
     int index = hashKey;
     int step = secondHash(data);
 
-    while (strlen(linearTable[index]) > 0)
-    {
+    int attempts = 0;
+    while (occupied[index] && attempts < TABLE_SIZE)
+    { 
         index = (index + step) % TABLE_SIZE;
+        attempts++;
     }
+
+    if (attempts == TABLE_SIZE)
+    {
+        printf("Hash table is full. Cannot insert: %s\n", data);
+        return;
+    }
+
     strcpy(linearTable[index], data);
+    occupied[index] = 1; // Mark as occupied
 }
 
-// Insert function
 void insertData(char data[])
 {
     int hashKey = getHash(data);
@@ -179,12 +221,11 @@ void insertData(char data[])
         insertLinearProbing(hashKey, data);
         break;
     case 3:
-        insertDoubleHashing(hashKey, data);
+        insertRehashing(hashKey, data);
         break;
     }
 }
 
-// Display function
 void displayHashTable()
 {
     printf("\nHash Table:\n");
@@ -209,17 +250,16 @@ void displayHashTable()
     }
 }
 
-// Menu
 void showMenu()
 {
     printf("Select Hashing Method:\n");
-    printf("1. First-Character\n2. Mid-Square\n3. Division\n4. Digit Extraction\n");
-    printf("Enter your choice: ");
+    printf("1. Mid-Square\n2. Division\n3. Folding\n4. Digit Extraction\n5. Exit\n");
+    printf("Input: ");
     scanf("%d", &selectedHashingMethod);
 
     printf("\nSelect Collision Handling:\n");
     printf("1. Chaining (Linked List)\n2. Linear Probing\n3. Double Hashing (Rehashing)\n");
-    printf("Enter your choice: ");
+    printf("Input: ");
     scanf("%d", &collisionHandlingMethod);
 }
 
