@@ -35,13 +35,30 @@ int midSquareHash(char data[])
     }
     key = key * key;
 
-    if (key > TABLE_SIZE)
+    char strKey[20];
+
+    // Ubah int menjadi string
+    sprintf(strKey, "%d", key);
+
+    // Ambil digit tengah
+    int len = strlen(strKey);
+
+    // index pertama digit tengah
+    int midStart = len / 2 - 1;
+
+    // Extract 2 digit tengah
+    char midDigits[3] = {strKey[midStart], strKey[midStart + 1], '\0'}; 
+
+    // Ubah string menjadi int
+    int middleValue = atoi(midDigits);
+
+    if (middleValue > TABLE_SIZE)
     {
-        return key % TABLE_SIZE;
+        return middleValue % TABLE_SIZE;
     }
     else
     {
-        return key;
+        return middleValue;
     }
 }
 
